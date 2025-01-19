@@ -106,15 +106,14 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 });
 
-
 function showImages(folderNumber) {
   const rectangleContainer = document.getElementById("rectangleContainer");
   rectangleContainer.innerHTML = ""; // Clear current content
 
   let imageArray;
 
+  // Folder 1 images
   if (folderNumber === 1) {
-    // Load images from the "overlay" folder for folder 1
     imageArray = [
       "Assets/Clothes/cat_ears.png",
       "Assets/Clothes/cowboy.png",
@@ -125,9 +124,8 @@ function showImages(folderNumber) {
       "Assets/Clothes/Scarf.png",
       "Assets/Clothes/supreme.png", 
       "Assets/Clothes/yugiboy.png"
-    ]; // Add more PNGs as needed from the overlay folder
+    ];
   } else if (folderNumber === 2) {
-    // Load images from the "overlay" folder for folder 2
     imageArray = [
       "Assets/Overlays/overlay1.png",
       "Assets/Overlays/overlay2.png",
@@ -139,98 +137,99 @@ function showImages(folderNumber) {
       "Assets/Overlays/overlay8.png", 
       "Assets/Overlays/overlay9.png",
       "Assets/Overlays/transparent.png"
-    ]; // Add more PNGs as needed from the overlay folder
+    ];
   }
 
-  // Loop through the array of images and display them
+  // Loop through the images and create the image elements
   imageArray.forEach(src => {
-    // Create a container div for the image and its background
     const imageWrapper = document.createElement("div");
-    imageWrapper.style.backgroundColor = "rgb(244, 233, 211)"; // Set the background color to beige
-    imageWrapper.style.width = "8vw"; // Same size as the image
-    imageWrapper.style.height = "8vw"; // Same size as the image
-    imageWrapper.style.margin = "0.5vw"; // Margin around the background div
-    imageWrapper.style.position = "relative"; // To position image within
+    imageWrapper.style.backgroundColor = "rgb(244, 233, 211)";
+    imageWrapper.style.width = "8vw";
+    imageWrapper.style.height = "8vw";
+    imageWrapper.style.margin = "0.5vw";
+    imageWrapper.style.position = "relative";
 
-    // Create the image element
     let img = document.createElement("img");
     img.src = src;
     img.classList.add("draggable");
-    img.style.width = "100%"; // Make the image fill the container
-    img.style.height = "100%"; // Make the image fill the container
-    img.style.position = "absolute"; // Position image absolutely inside the div
+    img.style.width = "100%";
+    img.style.height = "100%";
+    img.style.position = "absolute";
     img.style.top = "0";
     img.style.left = "0";
     img.setAttribute("draggable", "true");
 
-    // If folder 1, make the image draggable anywhere on the screen
-    if (folderNumber === 1) {
-      img.addEventListener("click", (e) => {
-        e.preventDefault(); // Prevent the default click behavior
+    // Ensure the image is loaded before attaching event listeners
+    img.onload = () => {
+      if (folderNumber === 1) {
+        img.addEventListener("click", (e) => {
+          e.preventDefault(); // Prevent the default click behavior
 
-        // Create a copy of the image and make it draggable
-        const draggableImg = document.createElement("img");
-        draggableImg.src = src;
-        draggableImg.style.position = "fixed"; // Fixed position on the screen
-        draggableImg.style.width = "10vw"; // Set the size of the draggable image
-        draggableImg.style.height = "10vw"; 
-        draggableImg.style.cursor = "move"; // Indicate it's draggable
-        draggableImg.style.transition = "transform 0.1s ease"; // Transition for smooth movement
+          // Create a copy of the image and make it draggable
+          const draggableImg = document.createElement("img");
+          draggableImg.src = src;
+          draggableImg.style.position = "fixed"; // Fixed position on the screen
+          draggableImg.style.width = "10vw"; // Set the size of the draggable image
+          draggableImg.style.height = "10vw"; 
+          draggableImg.style.cursor = "move"; // Indicate it's draggable
+          draggableImg.style.transition = "transform 0.1s ease"; // Transition for smooth movement
 
-        // Get the mouse click position to align the image perfectly with the cursor
-        const offsetX = e.clientX;
-        const offsetY = e.clientY;
+          // Position the draggable image at the cursor position
+          const offsetX = e.clientX;
+          const offsetY = e.clientY;
+          draggableImg.style.left = `${offsetX - draggableImg.width / 2}px`; 
+          draggableImg.style.top = `${offsetY - draggableImg.height / 2}px`;
 
-        // Position the draggable image at the cursor position
-        draggableImg.style.left = `${offsetX - draggableImg.width / 2}px`; // Adjust to center the image on the cursor
-        draggableImg.style.top = `${offsetY - draggableImg.height / 2}px`;
+          // Bring the image in front of the cat image by setting a high z-index
+          draggableImg.style.zIndex = "10000";
 
-        // Bring the image in front of the cat image by setting a high z-index
-        draggableImg.style.zIndex = "10000"; // This ensures it's always on top of other elements, including the cat image
+          // Append the new image to the body so it's visible on the screen
+          const centerDoll = document.querySelector(".center-doll");
 
-        // Ensure cat images have a lower z-index
-        const catImages = document.querySelectorAll(".cat_image");
-        catImages.forEach(catImage => {
-          catImage.style.zIndex = "999"; // Make sure cat image is beneath the draggable images
+          if (centerDoll) {
+            centerDoll.appendChild(draggableImg);
+          } else {
+            console.warn('No element with class "center-doll" found');
+          }
+
+          // Mouse drag functionality for the draggable image
+          draggableImg.addEventListener("mousedown", (e) => {
+            e.preventDefault();
+
+            const offsetX = e.clientX - draggableImg.offsetLeft;
+            const offsetY = e.clientY - draggableImg.offsetTop;
+
+            const onMouseMove = (moveEvent) => {
+              draggableImg.style.left = `${moveEvent.clientX - offsetX}px`;
+              draggableImg.style.top = `${moveEvent.clientY - offsetY}px`;
+            };
+
+            const onMouseUp = () => {
+              document.removeEventListener("mousemove", onMouseMove);
+              document.removeEventListener("mouseup", onMouseUp);
+            };
+
+            document.addEventListener("mousemove", onMouseMove);
+            document.addEventListener("mouseup", onMouseUp);
+          });
         });
+      } else if (folderNumber === 2) {
+        img.addEventListener("click", () => {
+          applyImageAsBackground(src); // Apply the clicked image as a background
+        });
+      }
+    };
 
-        // Append the new image to the body so it's visible on the screen
-        document.body.appendChild(draggableImg);
+    // Handle error loading the image
+    img.onerror = () => {
+      console.error("Error loading image:", src);
+    };
 
-        // Function to handle mouse move
-        const onMouseMove = (moveEvent) => {
-          draggableImg.style.left = `${moveEvent.clientX - draggableImg.width / 2}px`; // Recalculate position based on cursor
-          draggableImg.style.top = `${moveEvent.clientY - draggableImg.height / 2}px`; // Keep the image aligned with cursor
-        };
-
-        // Mouse up event to stop dragging
-        const onMouseUp = () => {
-          document.removeEventListener("mousemove", onMouseMove);
-          document.removeEventListener("mouseup", onMouseUp);
-        };
-
-        // Add mouse event listeners to handle drag
-        document.addEventListener("mousemove", onMouseMove);
-        document.addEventListener("mouseup", onMouseUp);
-      });
-    } else if (folderNumber === 2) {
-      // If folder 2, add click functionality to display image as a background
-      img.addEventListener("click", () => {
-        applyImageAsBackground(src); // Apply the clicked image as a background
-      });
-    }
-
-    // Append the image to the wrapper
+    // Append the image wrapper and image element to the container
     imageWrapper.appendChild(img);
-
-    // Append the wrapper to the rectangle container
     rectangleContainer.appendChild(imageWrapper);
   });
 }
-
-
-
-
 
 
 let currentImage = null;  // Variable to track the current image element
@@ -239,6 +238,12 @@ let currentRectangle = null;  // Variable to track the current rectangle element
 // Function to apply an image as background
 function applyImageAsBackground(imageSrc) {
   const catImage = document.querySelector(".cat_image");
+  const centerDoll = document.querySelector(".center-doll");
+
+  if (!centerDoll) {
+    console.warn('No element with class "center-doll" found');
+    return;
+  }
 
   // Remove the previous image if it exists
   if (currentImage) {
@@ -248,7 +253,7 @@ function applyImageAsBackground(imageSrc) {
   // Create the new rectangle with the image as background
   const rectangle = document.createElement("div");
   rectangle.id = "backgroundRectangle";
-  rectangle.style.position = "fixed";  // Use fixed positioning relative to the viewport
+  rectangle.style.position = "absolute";  // Use absolute positioning relative to the parent container
   rectangle.style.backgroundImage = `url(${imageSrc})`;  // Set the image as the background
   rectangle.style.backgroundSize = "cover";  // Ensure the image covers the entire rectangle
   rectangle.style.backgroundPosition = "center";  // Center the image
@@ -258,25 +263,34 @@ function applyImageAsBackground(imageSrc) {
   const borderRadius = computedStyle.borderRadius;
   const borderWidth = parseInt(computedStyle.borderWidth, 10);
 
-  // Get the bounding rectangle of the .cat_image element
-  const rect = catImage.getBoundingClientRect();
+  // Get the bounding rectangle of the .center-doll element
+  const rect = centerDoll.getBoundingClientRect();
 
-  // Adjust width and height to match the content area (subtract borders)
-  rectangle.style.width = `${rect.width - borderWidth * 2}px`;  // Subtract borders
-  rectangle.style.height = `${rect.height - borderWidth * 2}px`;  // Subtract borders
-  rectangle.style.left = `${rect.left + window.scrollX + borderWidth}px`;  // Adjust for scroll and border
-  rectangle.style.top = `${rect.top + window.scrollY + borderWidth}px`;  // Adjust for scroll and border
-  rectangle.style.borderRadius = '0.6vw';;
+  // Ensure no extra margins or borders are affecting the position
+  const scrollOffsetX = window.scrollX || 0;
+  const scrollOffsetY = window.scrollY || 0;
+
+  // Adjust width and height to match the content area (subtract borders if needed)
+  rectangle.style.width = `${rect.width}px`;  // Set width to match .center-doll
+  rectangle.style.height = `${rect.height}px`;  // Set height to match .center-doll
+
+  // Adjust position relative to the viewport, accounting for scrolling and any margins
+  rectangle.style.left = `${rect.left + scrollOffsetX}px`;  // Adjust for scroll and position relative to the viewport
+  rectangle.style.top = `${rect.top + scrollOffsetY}px`;  // Adjust for scroll and position relative to the viewport
+  
+  // Ensure no offsets from parent margins/padding
+  rectangle.style.marginLeft = '-6vw';  // Move the rectangle to the left by 5vw
+  rectangle.style.marginTop = '-9vw';  // Move the rectangle to the left by 5vw
+
+  rectangle.style.borderRadius = '1.5vw';  // Optional: Border-radius can match .center-doll's style
   rectangle.style.zIndex = `${parseInt(computedStyle.zIndex) + 1 || 0}`;  // Ensure rectangle is behind the cat image but in front of the background
 
   // Track the current image
   currentImage = rectangle;
 
-  // Append the rectangle to the document
-  document.body.appendChild(rectangle);
+  // Append the rectangle to the .center-doll element
+  centerDoll.appendChild(rectangle);
 }
-
-
 
 
 // Handle image drag start
@@ -356,11 +370,12 @@ colors.forEach(color => {
 }
 
 
-// Function to apply a color rectangle
+// change bg color
 function applyColor(color) {
   const catImage = document.querySelector(".cat_image");
   catImage.style.backgroundColor = color;
 }
+
 // Show font picker when the fourth folder is clicked
 function showFontPicker() {
   const rectangleContainer = document.getElementById("rectangleContainer");
@@ -447,8 +462,14 @@ function showFontPicker() {
       img.style.left = "50%"; // Start at the center of the screen
       img.style.top = "50%";  // Start at the center of the screen
 
-      // Append the image to the body to make it persist
-      document.body.appendChild(img);
+      const centerDoll = document.querySelector(".center-doll");
+
+      if (centerDoll) {
+        // Append the image to .center-doll to make it part of the doll container
+        centerDoll.appendChild(img);
+      } else {
+        console.warn('No element with class "center-doll" found');
+      }      
 
       // Make the image follow the mouse when clicked
       img.addEventListener("mousedown", (e) => {

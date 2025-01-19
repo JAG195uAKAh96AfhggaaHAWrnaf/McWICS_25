@@ -265,13 +265,12 @@ body, html {
 /* white bg for the nine things */
 
 .rectangle {
-  position: absolute;
-  width: 30vw;
-  height: 20vw;
+  position: absolute;  /* Position it within the parent container */
   background-color: white;
   border-radius: 1.5vw;
-  /* border: 2px #b6906b;  */
+  /* Optional: other styles like border, shadow, etc. */
 }
+
 
 /* Holds the nine things */
 
